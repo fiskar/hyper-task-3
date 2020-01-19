@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<title>Hyper-task-3</title>
+	<style type="text/css">
+		.wrapper { /*стилизация общего контейнера с контентом*/
+			max-width: 280px;
+			margin: 0 auto;
+			background: #f1f1f1;
+			padding: 0;
+		}
+
+		.rang {
+			text-align: center; /*задание положения регулятора*/
+		}
+
+		.meter { /*блок с svg-элементами*/
+			display: block;
+			width: 273px; 
+			height: 178px;
+			margin: 0 auto;
+		}
+
+		.meter-round { /*фоновая шкала*/
+			fill: #41B7D8; /*цвет*/
+			clip-path: url(#cut-bottom); /*применение ограничения обрасти видимости*/
+		}
+
+		.meter-clock { /*стрелка*/
+			transform: rotate(45deg); /*начальный угол наклона*/
+			transform-origin: 137px 155px; /*начальные координаты*/
+			stroke: white; /*цвет*/
+			stroke-width: 7px; /*толщина линии*/
+			stroke-linecap: round; /*тип окончания линии*/
+			stroke-opacity: .9; /*степень прозрачности*/
+		}
+
+		.meter-circle { /*центр стрелки*/
+			filter: url(#f0); /*применения фильтра теней*/
+			fill: white; /*цвет*/
+		}
+
+		.text {
+			font-size: 19px; /*задаем размер шрифтра на изображении*/
+		}
+	</style>
+</head>
+<body>
+	<div class="wrapper">
+		<div class="rang">
+			<svg class="meter">
+				<defs> <!-- шаблоны для применения к svg-элементам -->
+					<clipPath id='cut-bottom'> <!-- задание поля для ограничения видимой части фона -->
+						<rect x='41' y='59' width='192' height='96' />
+					</clipPath>
+					<filter id="f0" x="0" y="0" width="200%" height="200%"> <!-- фильтр для придания тени указателю -->
+						<feOffset result="offOut" in="SourceAlpha" dx="1" dy="1" />
+						<feGaussianBlur result="blurOut" in="offOut" stdDeviation="1" />
+						<feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+					</filter>
+					<path id="text-outline" d="M 39,155 A 100,97.720444 0 0 1 66,86 100,97.720444 0 0 1 209,88.106808 100,97.720444 0 0 1 235,155" /> <!-- контур для движения числа; длина 284 -->
+				</defs>
+				<circle  class="meter-round" r="96" cx="137" cy="155" /> <!-- фоновая шкала -->
+				<circle class="meter-circle" r="18" cx="137" cy="155" /> <!-- стрелка -->
+				<line class="meter-clock" x1="137" y1="70" x2="137" y2="155" /> <!-- стрелка -->
+				<g class='angle'>
+					<text class='text angle' x='215'> <!-- допустимые положения числа на дуге -4 288; 215 по дуге = 375 по заданной шкале -->
+						<textPath xlink:href='#text-outline'>375</textPath> <!-- применение контура движения числа -->
+					</text>
+				</g>
+				<text class='text' x='42' y='174'>0</text> <!-- нижние предел отображаемой шкалы -->
+				<text class='text' x='205' y='174'>500</text> <!-- верхний предел отображаемой шкалы -->
+			</svg>
+			<input class="rang-slider" id="range" type="range" min="0" max="500" /> <!-- регулятор положения стрелки и значения числа на шкале -->
+		</div>
+	</div>
+<script>
+	'use strict';
+	//выбор регулятора положения
+	let rangeMeter = document.querySelector('#range');
+	//выбор стрелки
+	let rangeClock = document.querySelector('.meter-clock');
+	//выбор положения и значения числа
+	let angleValue = document.querySelector('.angle');
+
+	function rangeChange() {
+	//присваиваем значение регулятора переменной
+	let rotateClock = rangeMeter.value;
+	// метод изменения положения и значения числа на шкале
+	angleValue.innerHTML = `<text class="text angle" x=${rotateClock*284/500}> <textPath xlink:href="#text-outline">${rotateClock}</textPath> </text>`;
+	// метод поворота стрелки
+	rangeClock.style.transform = 'rotate(' + (-90 + ((rotateClock * 180) / 500)) + 'deg)';
+	}
+	//меняем положение стрелки, числа и само число по изменению состояния регулятора
+	rangeMeter.addEventListener('input', rangeChange);
+</script>	
+</body>
+</html>
